@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blinking Name</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.001s;
+        }
+        
+        #nameDisplay {
+            font-size: 48px;
+            font-weight: bold;
+            transition: color 0.001s;
+        }
+        
+        #inputContainer {
+            text-align: center;
+        }
+        
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="inputContainer">
+        <h1>Enter Your Name</h1>
+        <input type="text" id="nameInput" placeholder="Your name">
+        <button onclick="start()">Start</button>
+    </div>
+    
+    <div id="nameDisplay" style="display: none;"></div>
+    
+    <script>
+        function createStutterPattern(name) {
+            // Create a stuttering pattern like "a.a a aa a aa aaa a a a a a a"
+            const parts = [];
+            const segments = Math.max(3, Math.floor(name.length / 2));
+            
+            for (let i = 0; i < 12; i++) { // Create 12 segments
+                const segmentLength = Math.floor(Math.random() * 3) + 1;
+                const startPos = Math.floor(Math.random() * (name.length - segmentLength));
+                parts.push(name.substr(startPos, segmentLength));
+                
+                // Randomly add pauses
+                if (Math.random() > 0.7) parts.push(".");
+                if (Math.random() > 0.8) parts.push(" ");
+            }
+            
+            return parts.join(" ");
+        }
+        
+        function start() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) return;
+            
+            document.getElementById('inputContainer').style.display = 'none';
+            const display = document.getElementById('nameDisplay');
+            display.textContent = name;
+            display.style.display = 'block';
+            
+            // Start blinking
+            let isWhite = false;
+            setInterval(() => {
+                isWhite = !isWhite;
+                document.body.style.backgroundColor = isWhite ? 'white' : 'black';
+                display.style.color = isWhite ? 'black' : 'white';
+            }, 1); // 1 millisecond interval
+            
+            // Start stuttering TTS
+            const stutterPattern = createStutterPattern(name);
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = stutterPattern;
+            speech.rate = 2.5; // Faster speech
+            
+            // Repeat every second
+            setInterval(() => {
+                window.speechSynthesis.cancel(); // Cancel any ongoing speech
+                window.speechSynthesis.speak(speech);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
